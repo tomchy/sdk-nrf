@@ -17,6 +17,15 @@
 #include "zb_nrf_platform.h"
 #include "zb_nrf_crypto.h"
 
+#if DT_NODE_EXISTS(DT_ALIAS(rst0))
+#include <zephyr.h>
+#include <soc.h>
+#include <device.h>
+#include <drivers/gpio.h>
+
+const char * const rst_pin_port = DT_GPIO_LABEL(DT_ALIAS(rst0), gpios);
+const uint8_t rst_pin_number = DT_GPIO_PIN(DT_ALIAS(rst0), gpios);
+#endif
 
 /**
  * Enumeration representing type of application callback to execute from ZBOSS
@@ -494,6 +503,29 @@ void zb_osif_abort(void)
 void zb_reset(zb_uint8_t param)
 {
 	ZVUNUSED(param);
+
+	while (param == 3) {
+#if DT_NODE_EXISTS(DT_ALIAS(rst0))
+		int err = 0;
+		const struct device * rst_dev =
+			device_get_binding(rst_pin_port);
+		if (!rst_dev) {
+			break;
+		}
+
+		err = gpio_pin_configure(rst_dev, rst_pin_number,
+					 GPIO_OUTPUT);
+		if (err) {
+			break;
+		}
+
+		err = gpio_pin_set_raw(rst_dev, rst_pin_number, 0);
+		if (err) {
+			break;
+		}
+#endif
+		return;
+	}
 
 	sys_reboot(SYS_REBOOT_COLD);
 }
