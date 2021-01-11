@@ -503,11 +503,7 @@ static int cmd_zb_active_ep(const struct shell *shell, size_t argc, char **argv)
 	uint16_t addr;
 	zb_ret_t zb_err_code;
 
-	/* Make sure ZBOSS buffer API is called safely. */
-	zb_osif_disable_all_inter();
 	bufid = zb_buf_get_out();
-	zb_osif_enable_all_inter();
-
 	if (!bufid) {
 		zb_cli_print_error(shell, "Failed to execute command (buf alloc failed)",
 				   ZB_FALSE);
@@ -519,11 +515,7 @@ static int cmd_zb_active_ep(const struct shell *shell, size_t argc, char **argv)
 	if (!parse_hex_u16(argv[1], &addr)) {
 		zb_cli_print_error(shell, "Incorrect network address",
 				   ZB_FALSE);
-
-		/* Make sure ZBOSS buffer API is called safely. */
-		zb_osif_disable_all_inter();
 		zb_buf_free(bufid);
-		zb_osif_enable_all_inter();
 
 		return -EINVAL;
 	}
@@ -533,11 +525,7 @@ static int cmd_zb_active_ep(const struct shell *shell, size_t argc, char **argv)
 	if (!ctx_entry) {
 		zb_cli_print_error(shell, "Too many ZDO transactions",
 				   ZB_FALSE);
-
-		/* Make sure ZBOSS buffer API is called safely. */
-		zb_osif_disable_all_inter();
 		zb_buf_free(bufid);
-		zb_osif_enable_all_inter();
 
 		return -ENOEXEC;
 	}
@@ -555,11 +543,7 @@ static int cmd_zb_active_ep(const struct shell *shell, size_t argc, char **argv)
 	if (ctx_entry_index == CTX_MGR_ENTRY_IVALID_INDEX) {
 		zb_cli_print_error(shell, "Invalid index of entry", ZB_FALSE);
 		ctx_mgr_delete_entry(ctx_entry);
-
-		/* Make sure ZBOSS buffer API is called safely. */
-		zb_osif_disable_all_inter();
 		zb_buf_free(bufid);
-		zb_osif_enable_all_inter();
 
 		return -ENOEXEC;
 	}
@@ -569,11 +553,7 @@ static int cmd_zb_active_ep(const struct shell *shell, size_t argc, char **argv)
 		zb_cli_print_error(shell, "Unable to schedule zdo request",
 				   ZB_FALSE);
 		ctx_mgr_delete_entry(ctx_entry);
-
-		/* Make sure ZBOSS buffer API is called safely. */
-		zb_osif_disable_all_inter();
 		zb_buf_free(bufid);
-		zb_osif_enable_all_inter();
 
 		return -ENOEXEC;
 	}
@@ -610,11 +590,7 @@ static int cmd_zb_simple_desc(const struct shell *shell, size_t argc,
 	zb_bufid_t bufid;
 	zb_uint16_t addr;
 
-	/* Make sure ZBOSS buffer API is called safely. */
-	zb_osif_disable_all_inter();
 	bufid = zb_buf_get_out();
-	zb_osif_enable_all_inter();
-
 	if (!bufid) {
 		zb_cli_print_error(shell, "Failed to execute command (buf alloc failed)",
 				   ZB_FALSE);
@@ -646,11 +622,7 @@ static int cmd_zb_simple_desc(const struct shell *shell, size_t argc,
 	if (!ctx_entry) {
 		zb_cli_print_error(shell, "Too many ZDO transactions",
 				   ZB_FALSE);
-
-		/* Make sure ZBOSS buffer API is called safely. */
-		zb_osif_disable_all_inter();
 		zb_buf_free(bufid);
-		zb_osif_enable_all_inter();
 
 		return -ENOEXEC;
 	}
@@ -668,11 +640,7 @@ static int cmd_zb_simple_desc(const struct shell *shell, size_t argc,
 	if (ctx_entry_index == CTX_MGR_ENTRY_IVALID_INDEX) {
 		zb_cli_print_error(shell, "Invalid index of entry", ZB_FALSE);
 		ctx_mgr_delete_entry(ctx_entry);
-
-		/* Make sure ZBOSS buffer API is called safely. */
-		zb_osif_disable_all_inter();
 		zb_buf_free(bufid);
-		zb_osif_enable_all_inter();
 
 		return -ENOEXEC;
 	}
@@ -682,11 +650,7 @@ static int cmd_zb_simple_desc(const struct shell *shell, size_t argc,
 		zb_cli_print_error(shell, "Unable to schedule zdo request",
 				   ZB_FALSE);
 		ctx_mgr_delete_entry(ctx_entry);
-
-		/* Make sure ZBOSS buffer API is called safely. */
-		zb_osif_disable_all_inter();
 		zb_buf_free(bufid);
-		zb_osif_enable_all_inter();
 
 		return -ENOEXEC;
 	}
@@ -694,10 +658,7 @@ static int cmd_zb_simple_desc(const struct shell *shell, size_t argc,
 	return 0;
 
 error:
-	/* Make sure ZBOSS buffer API is called safely. */
-	zb_osif_disable_all_inter();
 	zb_buf_free(bufid);
-	zb_osif_enable_all_inter();
 
 	return -EINVAL;
 }
@@ -756,11 +717,7 @@ static int cmd_zb_match_desc(const struct shell *shell, size_t argc,
 		return -EINVAL;
 	}
 
-	/* Make sure ZBOSS buffer API is called safely. */
-	zb_osif_disable_all_inter();
 	bufid = zb_buf_get_out();
-	zb_osif_enable_all_inter();
-
 	if (!bufid) {
 		zb_cli_print_error(shell, "Failed to execute command (buf alloc failed)",
 				   ZB_FALSE);
@@ -938,11 +895,7 @@ static int cmd_zb_match_desc(const struct shell *shell, size_t argc,
 	if (ctx_entry_index == CTX_MGR_ENTRY_IVALID_INDEX) {
 		zb_cli_print_error(shell, "Invalid index of entry", ZB_FALSE);
 		ctx_mgr_delete_entry(ctx_entry);
-
-		/* Make sure ZBOSS buffer API is called safely. */
-		zb_osif_disable_all_inter();
 		zb_buf_free(bufid);
-		zb_osif_enable_all_inter();
 
 		return -ENOEXEC;
 	}
@@ -959,10 +912,7 @@ static int cmd_zb_match_desc(const struct shell *shell, size_t argc,
 	return 0;
 
 error:
-	/* Make sure ZBOSS buffer API is called safely. */
-	zb_osif_disable_all_inter();
 	zb_buf_free(bufid);
-	zb_osif_enable_all_inter();
 
 	return ret_err;
 }
@@ -1005,11 +955,7 @@ static int cmd_zb_bind(const struct shell *shell, size_t argc, char **argv)
 		bind = ZB_FALSE;
 	}
 
-	/* Make sure ZBOSS buffer API is called safely. */
-	zb_osif_disable_all_inter();
 	bufid = zb_buf_get_out();
-	zb_osif_enable_all_inter();
-
 	if (!bufid) {
 		zb_cli_print_error(shell, "Failed to execute command (buf alloc failed)",
 				   ZB_FALSE);
@@ -1090,11 +1036,7 @@ static int cmd_zb_bind(const struct shell *shell, size_t argc, char **argv)
 	if (ctx_entry_index == CTX_MGR_ENTRY_IVALID_INDEX) {
 		zb_cli_print_error(shell, "Invalid index of entry", ZB_FALSE);
 		ctx_mgr_delete_entry(ctx_entry);
-
-		/* Make sure ZBOSS buffer API is called safely. */
-		zb_osif_disable_all_inter();
 		zb_buf_free(bufid);
-		zb_osif_enable_all_inter();
 
 		return -ENOEXEC;
 	}
@@ -1113,10 +1055,8 @@ error:
 	if (ctx_entry != NULL) {
 		ctx_mgr_delete_entry(ctx_entry);
 	}
-	/* Make sure ZBOSS buffer API is called safely. */
-	zb_osif_disable_all_inter();
+
 	zb_buf_free(bufid);
-	zb_osif_enable_all_inter();
 
 	return ret_err;
 }
@@ -1143,11 +1083,7 @@ static int cmd_zb_nwk_addr(const struct shell *shell, size_t argc, char **argv)
 	int ret_err = 0;
 	struct ctx_entry *ctx_entry = NULL;
 
-	/* Make sure ZBOSS buffer API is called safely. */
-	zb_osif_disable_all_inter();
 	bufid = zb_buf_get_out();
-	zb_osif_enable_all_inter();
-
 	if (!bufid) {
 		zb_cli_print_error(shell, "Failed to execute command (buf alloc failed)",
 				   ZB_FALSE);
@@ -1190,11 +1126,7 @@ static int cmd_zb_nwk_addr(const struct shell *shell, size_t argc, char **argv)
 	if (ctx_entry_index == CTX_MGR_ENTRY_IVALID_INDEX) {
 		zb_cli_print_error(shell, "Invalid index of entry", ZB_FALSE);
 		ctx_mgr_delete_entry(ctx_entry);
-
-		/* Make sure ZBOSS buffer API is called safely. */
-		zb_osif_disable_all_inter();
 		zb_buf_free(bufid);
-		zb_osif_enable_all_inter();
 
 		return -ENOEXEC;
 	}
@@ -1213,10 +1145,8 @@ error:
 	if (ctx_entry != NULL) {
 		ctx_mgr_delete_entry(ctx_entry);
 	}
-	/* Make sure ZBOSS buffer API is called safely. */
-	zb_osif_disable_all_inter();
+
 	zb_buf_free(bufid);
-	zb_osif_enable_all_inter();
 
 	return ret_err;
 }
@@ -1239,11 +1169,7 @@ static int cmd_zb_ieee_addr(const struct shell *shell, size_t argc, char **argv)
 	struct ctx_entry *ctx_entry = NULL;
 	zb_zdo_ieee_addr_req_param_t *ieee_addr_req = NULL;
 
-	/* Make sure ZBOSS buffer API is called safely. */
-	zb_osif_disable_all_inter();
 	bufid = zb_buf_get_out();
-	zb_osif_enable_all_inter();
-
 	if (!bufid) {
 		zb_cli_print_error(shell, "Failed to execute command (buf alloc failed)",
 				   ZB_FALSE);
@@ -1286,11 +1212,7 @@ static int cmd_zb_ieee_addr(const struct shell *shell, size_t argc, char **argv)
 	if (ctx_entry_index == CTX_MGR_ENTRY_IVALID_INDEX) {
 		zb_cli_print_error(shell, "Invalid index of entry", ZB_FALSE);
 		ctx_mgr_delete_entry(ctx_entry);
-
-		/* Make sure ZBOSS buffer API is called safely. */
-		zb_osif_disable_all_inter();
 		zb_buf_free(bufid);
-		zb_osif_enable_all_inter();
 
 		return -ENOEXEC;
 	}
@@ -1309,10 +1231,8 @@ error:
 	if (ctx_entry != NULL) {
 		ctx_mgr_delete_entry(ctx_entry);
 	}
-	/* Make sure ZBOSS buffer API is called safely. */
-	zb_osif_disable_all_inter();
+
 	zb_buf_free(bufid);
-	zb_osif_enable_all_inter();
 
 	return ret_err;
 }
@@ -1573,11 +1493,7 @@ static int cmd_zb_mgmt_leave(const struct shell *shell, size_t argc,
 	zb_bufid_t bufid = 0;
 	struct ctx_entry *ctx_entry = NULL;
 
-	/* Make sure ZBOSS buffer API is called safely. */
-	zb_osif_disable_all_inter();
 	bufid = zb_buf_get_out();
-	zb_osif_enable_all_inter();
-
 	if (bufid == 0) {
 		zb_cli_print_error(shell, "Failed to execute command (buf alloc failed)",
 				   ZB_FALSE);
@@ -1586,13 +1502,10 @@ static int cmd_zb_mgmt_leave(const struct shell *shell, size_t argc,
 
 	mgmt_leave_req = ZB_BUF_GET_PARAM(bufid, zb_zdo_mgmt_leave_param_t);
 	if (!cmd_zb_mgmt_leave_parse(mgmt_leave_req, shell, argc, argv)) {
-		/* Make sure ZBOSS buffer API is called safely.
-		 * Also, the error message has already been printed
+		/* The error message has already been printed
 		 * by cmd_zb_mgmt_leave_parse.
 		 */
-		zb_osif_disable_all_inter();
 		zb_buf_free(bufid);
-		zb_osif_enable_all_inter();
 
 		return -EINVAL;
 	}
@@ -1619,11 +1532,7 @@ static int cmd_zb_mgmt_leave(const struct shell *shell, size_t argc,
 	if (ctx_entry_index == CTX_MGR_ENTRY_IVALID_INDEX) {
 		zb_cli_print_error(shell, "Invalid index of entry", ZB_FALSE);
 		ctx_mgr_delete_entry(ctx_entry);
-
-		/* Make sure ZBOSS buffer API is called safely. */
-		zb_osif_disable_all_inter();
 		zb_buf_free(bufid);
-		zb_osif_enable_all_inter();
 
 		return -ENOEXEC;
 	}
@@ -1639,10 +1548,7 @@ static int cmd_zb_mgmt_leave(const struct shell *shell, size_t argc,
 
 error:
 	if (bufid != 0) {
-		/* Make sure ZBOSS buffer API is called safely. */
-		zb_osif_disable_all_inter();
 		zb_buf_free(bufid);
-		zb_osif_enable_all_inter();
 	}
 	if (ctx_entry != NULL) {
 		ctx_mgr_delete_entry(ctx_entry);
@@ -2002,11 +1908,7 @@ static int cmd_zb_mgmt_bind(const struct shell *shell, size_t argc, char **argv)
 		goto error;
 	}
 
-	/* Make sure ZBOSS buffer API is called safely. */
-	zb_osif_disable_all_inter();
 	bufid = zb_buf_get_out();
-	zb_osif_enable_all_inter();
-
 	if (!bufid) {
 		zb_cli_print_error(shell, "Failed to execute command (buf alloc failed)",
 				   ZB_FALSE);
@@ -2032,11 +1934,7 @@ static int cmd_zb_mgmt_bind(const struct shell *shell, size_t argc, char **argv)
 	if (ctx_entry_index == CTX_MGR_ENTRY_IVALID_INDEX) {
 		zb_cli_print_error(shell, "Invalid index of entry", ZB_FALSE);
 		ctx_mgr_delete_entry(ctx_entry);
-
-		/* Make sure ZBOSS buffer API is called safely. */
-		zb_osif_disable_all_inter();
 		zb_buf_free(bufid);
-		zb_osif_enable_all_inter();
 
 		return -ENOEXEC;
 	}
@@ -2053,10 +1951,7 @@ static int cmd_zb_mgmt_bind(const struct shell *shell, size_t argc, char **argv)
 
 error:
 	if (bufid != 0) {
-		/* Make sure ZBOSS buffer API is called safely. */
-		zb_osif_disable_all_inter();
 		zb_buf_free(bufid);
-		zb_osif_enable_all_inter();
 	}
 	if (ctx_entry != NULL) {
 		ctx_mgr_delete_entry(ctx_entry);
@@ -2120,11 +2015,7 @@ static bool zdo_mgmt_lqi_cb(struct ctx_entry *ctx_entry, zb_bufid_t bufid)
 		    (resp->neighbor_table_list_count > 0)) {
 			zb_zdo_mgmt_lqi_param_t *request;
 
-			/* Make sure ZBOSS buffer API is called safely. */
-			zb_osif_disable_all_inter();
 			(void)(zb_buf_reuse(bufid));
-			zb_osif_enable_all_inter();
-
 			request = ZB_BUF_GET_PARAM(bufid,
 						   zb_zdo_mgmt_lqi_param_t);
 
@@ -2168,11 +2059,7 @@ static int cmd_zb_mgmt_lqi(const struct shell *shell, size_t argc, char **argv)
 	zb_bufid_t bufid = 0;
 	struct ctx_entry *ctx_entry = NULL;
 
-	/* Make sure ZBOSS buffer API is called safely. */
-	zb_osif_disable_all_inter();
 	bufid = zb_buf_get_out();
-	zb_osif_enable_all_inter();
-
 	if (!bufid) {
 		zb_cli_print_error(shell, "Failed to allocate request buffer",
 				   ZB_FALSE);
@@ -2222,11 +2109,7 @@ static int cmd_zb_mgmt_lqi(const struct shell *shell, size_t argc, char **argv)
 	if (ctx_entry_index == CTX_MGR_ENTRY_IVALID_INDEX) {
 		zb_cli_print_error(shell, "Invalid index of entry", ZB_FALSE);
 		ctx_mgr_delete_entry(ctx_entry);
-
-		/* Make sure ZBOSS buffer API is called safely. */
-		zb_osif_disable_all_inter();
 		zb_buf_free(bufid);
-		zb_osif_enable_all_inter();
 
 		return -ENOEXEC;
 	}
@@ -2243,10 +2126,7 @@ static int cmd_zb_mgmt_lqi(const struct shell *shell, size_t argc, char **argv)
 
 error:
 	if (bufid != 0) {
-		/* Make sure ZBOSS buffer API is called safely. */
-		zb_osif_disable_all_inter();
 		zb_buf_free(bufid);
-		zb_osif_enable_all_inter();
 	}
 	if (ctx_entry != NULL) {
 		ctx_mgr_delete_entry(ctx_entry);
