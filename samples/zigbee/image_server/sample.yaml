@@ -1,0 +1,8 @@
+sample:
+  name: Zigbee Image Server
+  description: Zigbee Image Server
+tests:
+  zigbee.image_server:
+    build_only: true
+    platform_allow: nrf52840dk_nrf52840
+    tags: ci_build
