@@ -30,6 +30,9 @@
 /* Maximum interval between join/rejoin attempts. */
 #define REJOIN_INTERVAL_MAX_S    (15 * 60)
 
+/* Rejoin interval, after which the device will perform TC rejoin instead of a secure rejoin. */
+#define TC_REJOIN_INTERVAL_THRESHOLD_S (2 * 60)
+
 #define IEEE_ADDR_BUF_SIZE       17
 
 #if defined CONFIG_ZIGBEE_FACTORY_RESET
@@ -623,6 +626,52 @@ zb_ret_t zigbee_default_signal_handler(zb_bufid_t bufid)
 		/* Obsolete signals, used for pre-R21 ZBOSS API. Ignore. */
 		break;
 
+	case ZB_BDB_SIGNAL_TC_REJOIN_DONE:
+		/* This signal informs that TC rejoin is completed.
+		 * The signal status indicates if the device has successfully
+		 * rejoined the network.
+		 *
+		 * Next step: if the device implement Zigbee router or
+		 *            end device, and the TC rejoijn has failed,
+		 *            perform restart the generic rejoin procedure.
+		 */
+		if (status == RET_OK) {
+			zb_ext_pan_id_t extended_pan_id;
+			char ieee_addr_buf[IEEE_ADDR_BUF_SIZE] = { 0 };
+			int addr_len;
+
+			zb_get_extended_pan_id(extended_pan_id);
+			addr_len = ieee_addr_to_str(ieee_addr_buf,
+						    sizeof(ieee_addr_buf),
+						    extended_pan_id);
+			if (addr_len < 0) {
+				strcpy(ieee_addr_buf, "unknown");
+			}
+
+			LOG_INF("Joined network successfully after TC rejoin (Extended PAN ID: %s, PAN ID: 0x%04hx)",
+				log_strdup(ieee_addr_buf),
+				ZB_PIBCACHE_PAN_ID());
+			/* Device has joined the network so stop the network
+			 * rejoin procedure.
+			 */
+			if (role != ZB_NWK_DEVICE_TYPE_COORDINATOR) {
+				stop_network_rejoin(ZB_FALSE);
+			}
+		} else {
+			if (role != ZB_NWK_DEVICE_TYPE_COORDINATOR) {
+				LOG_INF("Network steering was not successful (status: %d)",
+					status);
+				start_network_rejoin();
+			} else {
+				LOG_INF("Network steering failed on Zigbee coordinator (status: %d)",
+					status);
+			}
+		}
+		if (!IS_ENABLED(CONFIG_ZIGBEE_ROLE_END_DEVICE)) {
+			zb_enable_auto_pan_id_conflict_resolution(ZB_FALSE);
+		}
+		break;
+
 	default:
 		/* Unimplemented signal. For more information,
 		 * see: zb_zdo_app_signal_type_e and zb_ret_e.
@@ -697,6 +746,7 @@ static void rejoin_the_network(zb_uint8_t param)
 		} else if (!is_rejoin_in_progress) {
 			/* Calculate new timeout */
 			zb_time_t timeout_s;
+			zb_ret_t zb_err_code;
 
 			if ((1 << rejoin_attempt_cnt) > REJOIN_INTERVAL_MAX_S) {
 				timeout_s = REJOIN_INTERVAL_MAX_S;
@@ -705,12 +755,21 @@ static void rejoin_the_network(zb_uint8_t param)
 				rejoin_attempt_cnt++;
 			}
 
-			zb_ret_t zb_err_code = ZB_SCHEDULE_APP_ALARM(
-				start_network_steering,
-				ZB_FALSE,
-				ZB_MILLISECONDS_TO_BEACON_INTERVAL(timeout_s *
-								   1000));
-			ZB_ERROR_CHECK(zb_err_code);
+			if ((timeout_s > TC_REJOIN_INTERVAL_THRESHOLD_S) && (!zb_bdb_is_factory_new())) {
+				zb_err_code = ZB_SCHEDULE_APP_ALARM(
+					zb_bdb_initiate_tc_rejoin,
+					ZB_UNDEFINED_BUFFER,
+					ZB_MILLISECONDS_TO_BEACON_INTERVAL(timeout_s *
+									   1000));
+				ZB_ERROR_CHECK(zb_err_code);
+			} else {
+				zb_err_code = ZB_SCHEDULE_APP_ALARM(
+					start_network_steering,
+					ZB_FALSE,
+					ZB_MILLISECONDS_TO_BEACON_INTERVAL(timeout_s *
+									   1000));
+				ZB_ERROR_CHECK(zb_err_code);
+			}
 
 			is_rejoin_in_progress = true;
 		}
