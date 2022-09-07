@@ -1,0 +1,25 @@
+/*
+ * Copyright (c) 2022 Tomasz Chyrowicz
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/ {
+	stepper_drivers {
+		stepper1: stepper_1 {
+			compatible = "zephyr,stepper";
+			status = "okay";
+
+			dir-gpios = <&gpio0 30 GPIO_ACTIVE_HIGH>;
+			step-gpios = <&gpio0 31 GPIO_ACTIVE_HIGH>;
+			m1-gpios = <&gpio1 12 GPIO_ACTIVE_HIGH>;
+			m2-gpios = <&gpio1 13 GPIO_ACTIVE_HIGH>;
+			nstby-gpios = <&gpio0 29 GPIO_ACTIVE_HIGH>;
+			counter-timer = <&timer2>;
+
+			distance-per-step-mm = <1>;
+			max-acceleration = <2>;
+			max-velocity = <10>;
+		};
+	};
+};
