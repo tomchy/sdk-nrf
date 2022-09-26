@@ -1,0 +1,52 @@
+#
+# Copyright (c) 2022 Nordic Semiconductor
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+if USB
+config USB_DEVICE_PID
+	default 0x53A0
+endif
+
+# How often sensor data is read
+config WEATHER_CHECK_PERIOD_SECONDS
+	int
+	default 60
+
+# Delay after app initialization
+config FIRST_WEATHER_CHECK_DELAY_SECONDS
+	int
+	default 5
+
+# Delay after joining the network
+config FIND_SENSOR_DELAY_SECONDS
+	int
+	default 3
+
+# Interval between sending identify queries
+config FIND_SENSOR_RETRY_INTERVAL_SECONDS
+	int
+	default 10
+
+source "Kconfig.zephyr"
+
+module = SMEEZE
+module-str = Smeeze
+source "subsys/logging/Kconfig.template.log_config"
+
+module = SMEEZE_WSTATION
+module-str = Smeeze - weather station module
+source "subsys/logging/Kconfig.template.log_config"
+
+module = SMEEZE_DOOR_LOCK
+module-str = Smeeze - door lock module
+source "subsys/logging/Kconfig.template.log_config"
+
+module = SMEEZE_SFINDER
+module-str = Smeeze - temperature sensor finder
+source "subsys/logging/Kconfig.template.log_config"
+
+module = SMEEZE_SMEEZE
+module-str = Smeeze - the automatic door opening/closing
+source "subsys/logging/Kconfig.template.log_config"

@@ -1,0 +1,16 @@
+sample:
+  name: Smeeze
+  description: Smeeze - the smart breeze
+tests:
+  applications.smeeze:
+    build_only: true
+    platform_allow: thingy53_nrf5340_cpuapp
+    tags: ci_build
+    extra_args: CONF_FILE=prj_release.conf
+    integration_platforms:
+      - thingy53_nrf5340_cpuapp
+  applications.smeeze.debug:
+    build_only: true
+    platform_allow: thingy53_nrf5340_cpuapp
+    tags: ci_build debug
+    extra_args: CONF_FILE=prj.conf
