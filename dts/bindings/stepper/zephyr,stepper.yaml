@@ -1,0 +1,55 @@
+# Copyright (c) 2022, Tomasz Chyrowicz
+# SPDX-License-Identifier: Apache-2.0
+
+description: Stepper motor driver
+
+compatible: "zephyr,stepper"
+
+include: base.yaml
+
+properties:
+    dir-gpios:
+        type: phandle-array
+        required: true
+        description: |
+            GPIO of the SOC controlling direction pin of the stepper driver
+    step-gpios:
+        type: phandle-array
+        required: true
+        description: |
+            GPIO of the SOC controlling step pin of the stepper driver
+    m1-gpios:
+        type: phandle-array
+        required: false
+        description: |
+            GPIO of the SOC controlling Mode 1 pin of the micro-stepper driver
+    m2-gpios:
+        type: phandle-array
+        required: false
+        description: |
+            GPIO of the SOC controlling Mode 2 pin of the micro-stepper driver
+    nstby-gpios:
+        type: phandle-array
+        required: false
+        description: |
+            GPIO of the SOC controlling standby pin of the stepper driver
+    counter-timer:
+        type: phandle
+        required: false
+        description: |
+            Counter instance to generate the micro-stepper driver pulses
+    distance-per-step-mm:
+        type: int
+        default: 1
+        description: |
+            Linear travel distance per single motor step [mm/step]
+    max-acceleration:
+        type: int
+        default: 1
+        description: |
+            Maximum allowed linear acceleration [mm/second^2]
+    max-velocity:
+        type: int
+        default: 10
+        description: |
+            Maximum allowed linear velocity [mm/second]

@@ -1,0 +1,25 @@
+# Stepper motor driver
+#
+# Copyright (c) 2022 Tomasz Chyrowicz
+#
+# SPDX-License-Identifier: Apache-2.0
+
+menuconfig STEPPER
+	bool "Stepper motor Driver"
+	imply COUNTER
+	help
+	  Enable stepper motor driver.
+
+module = STEPPER
+module-str = stepper
+source "subsys/logging/Kconfig.template.log_config"
+
+if STEPPER
+
+config STEPPER_INIT_PRIORITY
+	int "Stepper motor driver initialization priority"
+	default 90
+	help
+	  System initialization priority for the stepper motor driver.
+
+endif # STEPPER
