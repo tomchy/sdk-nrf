@@ -72,5 +72,8 @@ if(NOT NO_BOILERPLATE)
     endif()
   endif()
 
+  # Generate syscalls for nRF-specific drivers
+  list(APPEND SYSCALL_INCLUDE_DIRS ${NRF_DIR}/include/drivers)
+
   include(${NRF_DIR}/cmake/boilerplate.cmake NO_POLICY_SCOPE)
 endif()
