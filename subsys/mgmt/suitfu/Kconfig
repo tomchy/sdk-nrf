@@ -32,7 +32,7 @@ config MGMT_SUITFU_GRP_IMG
 	bool "SUIT over Application, software image management group"
 	default y
 	# The IMG MGMT group is substituted, not extended by the SUIT variant
-	depends on !MCUMGR_CMD_IMG_MGMT
+	depends on !MCUMGR_GRP_IMG
 
 
 if MGMT_SUITFU_GRP_IMG
