@@ -70,7 +70,7 @@ static int suitfu_mgmt_img_upload(struct smp_streamer *ctx)
 		ZCBOR_MAP_DECODE_KEY_VAL(sha, zcbor_bstr_decode, &req.data_sha),
 		ZCBOR_MAP_DECODE_KEY_VAL(upgrade, zcbor_bool_decode, &req.upgrade)};
 
-	if (zcbor_map_decode_bulk(zsd, image_upload_decode, ARRAY_SIZE(image_upload_decode),
+	if (zcbor_noncanonical_map_decode_bulk(zsd, image_upload_decode, ARRAY_SIZE(image_upload_decode),
 				  &decoded) != 0) {
 		LOG_ERR("Decoding image upload request failed");
 		return MGMT_ERR_EINVAL;

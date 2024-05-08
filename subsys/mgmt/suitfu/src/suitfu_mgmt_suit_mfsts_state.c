@@ -91,7 +91,7 @@ int suitfu_mgmt_suit_manifest_state_read(struct smp_streamer *ctx)
 	struct zcbor_map_decode_key_val manifest_state_read_decode[] = {
 		ZCBOR_MAP_DECODE_KEY_VAL(role, zcbor_int_decode, &role)};
 
-	if (zcbor_map_decode_bulk(zsd, manifest_state_read_decode,
+	if (zcbor_noncanonical_map_decode_bulk(zsd, manifest_state_read_decode,
 				  ARRAY_SIZE(manifest_state_read_decode), &decoded) != 0) {
 		LOG_ERR("Decoding manifest state read request failed");
 		return MGMT_ERR_EINVAL;

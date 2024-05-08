@@ -48,6 +48,7 @@ config SUIT_DFU_CANDIDATE_PROCESSING_MINIMAL
 	imply SUIT_UTILS
 	imply SUIT_METADATA
 	imply SSF_SUIT_SERVICE_ENABLED
+	imply SUIT_ZCBOR_NONCANONICAL
 	imply SUIT_MPI_GENERATE
 
 config SUIT_DFU_CANDIDATE_PROCESSING_FULL
@@ -78,6 +79,7 @@ config SUIT_DFU_CANDIDATE_PROCESSING_FULL
 	imply SUIT_STREAM_SINK_MEMPTR
 	imply SUIT_CACHE
 	imply SUIT_CACHE_RW
+	imply SUIT_ZCBOR_NONCANONICAL
 	imply SUIT_STREAM_SINK_CACHE
 	imply SUIT_STREAM_SINK_FLASH
 	imply SUIT_MEMPTR_STORAGE
@@ -149,6 +151,7 @@ config SUIT_ENABLE_DEFAULTS_SDFW
 	imply SUIT_MEMPTR_STORAGE
 	imply SUIT_UTILS
 	imply SUIT_CACHE
+	imply SUIT_ZCBOR_NONCANONICAL
 	imply SUIT_STORAGE
 	imply SUIT_SINK_SELECTOR
 	imply SUIT_EXECUTION_MODE
@@ -174,6 +177,7 @@ rsource "utils/Kconfig"
 rsource "envelope_info/Kconfig"
 rsource "execution_mode/Kconfig"
 rsource "memory_layout/Kconfig"
+rsource "zcbor_noncanonical_decode/Kconfig"
 
 # Configure SUIT_LOG_LEVEL
 module = SUIT

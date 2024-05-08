@@ -57,7 +57,7 @@ int suitfu_mgmt_suit_envelope_upload(struct smp_streamer *ctx)
 		ZCBOR_MAP_DECODE_KEY_VAL(len, zcbor_size_decode, &req.size),
 		ZCBOR_MAP_DECODE_KEY_VAL(off, zcbor_size_decode, &req.off)};
 
-	if (zcbor_map_decode_bulk(zsd, envelope_upload_decode, ARRAY_SIZE(envelope_upload_decode),
+	if (zcbor_noncanonical_map_decode_bulk(zsd, envelope_upload_decode, ARRAY_SIZE(envelope_upload_decode),
 				  &decoded) != 0) {
 		LOG_ERR("Decoding envelope upload request failed");
 		return MGMT_ERR_EINVAL;

@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <zcbor_common.h>
 #include <zephyr/mgmt/mcumgr/smp/smp.h>
+#include <mgmt/mcumgr/util/zcbor_bulk.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -137,6 +138,46 @@ int suitfu_mgmt_suit_missing_image_upload(struct smp_streamer *ctx);
  *
  */
 int suitfu_mgmt_suit_bootloader_info_read(struct smp_streamer *ctx);
+
+/** @brief Decodes single level map according to a provided key-decode map.
+ *
+ * The function takes @p map of key to decoder array defined as:
+ *
+ *	struct zcbor_map_decode_key_val map[] = {
+ *		ZCBOR_MAP_DECODE_KEY_DECODER("key0", decode_fun0, val_ptr0),
+ *		ZCBOR_MAP_DECODE_KEY_DECODER("key1", decode_fun1, val_ptr1),
+ *		...
+ *	};
+ *
+ * where "key?" is string representing key; the decode_fun? is
+ * zcbor_decoder_t compatible function, either from zcbor or defined by
+ * user; val_ptr? are pointers to variables where decoder function for
+ * a given key will place a decoded value - they have to agree in type
+ * with decoder function.
+ *
+ * Failure to decode any of values will cause the function to return
+ * negative error, and leave the map open: map is broken anyway or key-decoder
+ * mapping is broken, and we can not really decode the map.
+ *
+ * Note that the function opens map by itself and will fail if map
+ * is already opened.
+ *
+ * @param zsd		zcbor decoder state;
+ * @param map		key-decoder mapping list;
+ * @param map_size	size of maps, both maps have to have the same size;
+ * @param matched	pointer to the  counter of matched keys, zeroed upon
+ *			successful map entry and incremented only for successful
+ *			decoded fields.
+ * @return		0 when the whole map has been parsed, there have been
+ *			no decoding errors, and map has been closed successfully;
+ *			-ENOMSG when given decoder function failed to decode
+ *			value;
+ *			-EADDRINUSE when key appears twice within map, map is then
+ *			parsed up to they key that has appeared twice;
+ *			-EBADMSG when failed to close map.
+ */
+int zcbor_noncanonical_map_decode_bulk(zcbor_state_t *zsd, struct zcbor_map_decode_key_val *map,
+                          size_t map_size, size_t *matched);
 
 #ifdef __cplusplus
 }

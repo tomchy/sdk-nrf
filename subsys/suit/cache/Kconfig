@@ -7,6 +7,7 @@
 menuconfig SUIT_CACHE
 	bool "Enable SUIT cache support library"
 	depends on ZCBOR
+	depends on SUIT_ZCBOR_NONCANONICAL
 	imply SUIT_STREAM_SINK_RAM
 	imply SUIT_STREAM
 

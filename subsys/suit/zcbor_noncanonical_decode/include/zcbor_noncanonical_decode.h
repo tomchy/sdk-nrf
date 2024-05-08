@@ -28,4 +28,20 @@ bool zcbor_noncanonical_bstr_start_decode_fragment(zcbor_state_t *state,
  */
 bool zcbor_noncanonical_map_start_decode(zcbor_state_t *state);
 
+/** Finalize decoding a list/map
+ *
+ * Check that the list/map had the correct number of elements, and restore the
+ * previous element count from the backup.
+ *
+ * Use @ref zcbor_list_map_end_force_decode to forcibly consume the backup if
+ * something has gone wrong.
+ *
+ * In all successful cases, the state is returned pointing to the byte/element
+ * after the list/map in the payload.
+ *
+ * @retval true   Everything ok.
+ * @retval false  Element count not correct.
+ */
+bool zcbor_noncanonical_map_end_decode(zcbor_state_t *state);
+
 #endif /* ZCBOR_NONCANONICAL_DECODE_H__ */

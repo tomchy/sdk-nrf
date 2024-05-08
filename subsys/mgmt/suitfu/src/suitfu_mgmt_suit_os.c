@@ -25,7 +25,7 @@ int suitfu_mgmt_suit_bootloader_info_read(struct smp_streamer *ctxt)
 		ZCBOR_MAP_DECODE_KEY_DECODER("query", zcbor_tstr_decode, &query),
 	};
 
-	if (zcbor_map_decode_bulk(zsd, bootloader_info, ARRAY_SIZE(bootloader_info), &decoded)) {
+	if (zcbor_noncanonical_map_decode_bulk(zsd, bootloader_info, ARRAY_SIZE(bootloader_info), &decoded)) {
 		return MGMT_ERR_EINVAL;
 	}
 

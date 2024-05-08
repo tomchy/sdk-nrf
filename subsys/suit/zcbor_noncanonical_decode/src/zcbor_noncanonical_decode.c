@@ -225,6 +225,36 @@ static bool list_map_start_decode(zcbor_state_t *state, zcbor_major_type_t exp_m
 	return true;
 }
 
+static bool array_end_expect(zcbor_state_t *state)
+{
+	INITIAL_CHECKS();
+	ZCBOR_ERR_IF(*state->payload != 0xFF, ZCBOR_ERR_WRONG_TYPE);
+
+	state->payload++;
+	return true;
+}
+
+bool zcbor_noncanonical_map_end_decode(zcbor_state_t *state)
+{
+	size_t max_elem_count = 0;
+
+	if (state->decode_state.indefinite_length_array) {
+		if (!array_end_expect(state)) {
+			ZCBOR_FAIL();
+		}
+		max_elem_count = ZCBOR_MAX_ELEM_COUNT;
+		state->decode_state.indefinite_length_array = false;
+	}
+
+	if (!zcbor_process_backup(state,
+			ZCBOR_FLAG_RESTORE | ZCBOR_FLAG_CONSUME | ZCBOR_FLAG_KEEP_PAYLOAD,
+			max_elem_count)) {
+		ZCBOR_FAIL();
+	}
+
+	return true;
+}
+
 bool zcbor_noncanonical_map_start_decode(zcbor_state_t *state)
 {
 	PRINT_FUNC();
