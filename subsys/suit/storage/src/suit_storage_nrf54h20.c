@@ -12,6 +12,8 @@
 
 LOG_MODULE_REGISTER(suit_storage, CONFIG_SUIT_LOG_LEVEL);
 
+#define SUIT_STORAGE_OFFSET	    FIXED_PARTITION_OFFSET(suit_storage_partition)
+#define SUIT_STORAGE_SIZE	    FIXED_PARTITION_SIZE(suit_storage_partition)
 #define SUIT_STORAGE_NORDIC_ADDRESS suit_plat_mem_nvm_ptr_get(SUIT_STORAGE_NORDIC_OFFSET)
 #define SUIT_STORAGE_NORDIC_OFFSET  FIXED_PARTITION_OFFSET(cpusec_suit_storage)
 #define SUIT_STORAGE_NORDIC_SIZE    FIXED_PARTITION_SIZE(cpusec_suit_storage)
@@ -21,6 +23,21 @@ LOG_MODULE_REGISTER(suit_storage, CONFIG_SUIT_LOG_LEVEL);
 #define SUIT_STORAGE_APP_ADDRESS    suit_plat_mem_nvm_ptr_get(SUIT_STORAGE_APP_OFFSET)
 #define SUIT_STORAGE_APP_OFFSET	    FIXED_PARTITION_OFFSET(cpuapp_suit_storage)
 #define SUIT_STORAGE_APP_SIZE	    FIXED_PARTITION_SIZE(cpuapp_suit_storage)
+
+BUILD_ASSERT((SUIT_STORAGE_OFFSET <= SUIT_STORAGE_NORDIC_OFFSET) &&
+		     (SUIT_STORAGE_NORDIC_OFFSET + SUIT_STORAGE_NORDIC_SIZE <=
+		      SUIT_STORAGE_OFFSET + SUIT_STORAGE_SIZE),
+	     "Secure storage must be defined within SUIT storage partition");
+
+BUILD_ASSERT((SUIT_STORAGE_OFFSET <= SUIT_STORAGE_RAD_OFFSET) &&
+		     (SUIT_STORAGE_RAD_OFFSET + SUIT_STORAGE_RAD_SIZE <=
+		      SUIT_STORAGE_OFFSET + SUIT_STORAGE_SIZE),
+	     "Radiocore storage must be defined within SUIT storage partition");
+
+BUILD_ASSERT((SUIT_STORAGE_OFFSET <= SUIT_STORAGE_APP_OFFSET) &&
+		     (SUIT_STORAGE_APP_OFFSET + SUIT_STORAGE_APP_SIZE <=
+		      SUIT_STORAGE_OFFSET + SUIT_STORAGE_SIZE),
+	     "Application storage must be defined within SUIT storage partition");
 
 typedef uint8_t suit_storage_digest_t[32];
 
