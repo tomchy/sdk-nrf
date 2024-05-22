@@ -13,24 +13,15 @@ set(SUIT_GENERATOR_CLI_SCRIPT "${ZEPHYR_SUIT_GENERATOR_MODULE_DIR}/suit_generato
 #
 function(configure_storage_address_cache)
   # Calculate SUIT storage address, based on the DTS
-  dt_chosen(nvm_dev PROPERTY zephyr,flash)
   dt_nodelabel(suit_storage_dev NODELABEL suit_storage_partition)
 
-  if ((NOT DEFINED nvm_dev) OR (NOT DEFINED suit_storage_dev))
+  if (NOT DEFINED suit_storage_dev)
     message(WARNING "Unable to read SUIT storage address from DTS - nodes undefined")
     return()
   endif()
 
-  dt_reg_addr(nvm_addr PATH ${nvm_dev})
-  dt_reg_addr(suit_storage_addr PATH ${suit_storage_dev})
+  dt_reg_addr(SUIT_STORAGE_ADDRESS PATH ${suit_storage_dev})
 
-  MATH(
-    EXPR
-    SUIT_STORAGE_ADDRESS
-    "${nvm_addr}
-      + ${suit_storage_addr}"
-    OUTPUT_FORMAT HEXADECIMAL
-  )
   set(SUIT_STORAGE_ADDRESS ${SUIT_STORAGE_ADDRESS} CACHE STRING "SUIT storage address")
 endfunction()
 

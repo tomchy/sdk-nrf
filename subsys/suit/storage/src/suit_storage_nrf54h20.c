@@ -12,7 +12,9 @@
 
 LOG_MODULE_REGISTER(suit_storage, CONFIG_SUIT_LOG_LEVEL);
 
-#define SUIT_STORAGE_OFFSET	    FIXED_PARTITION_OFFSET(suit_storage_partition)
+/* SUIT storage partition is defined as "reserved-memory" region, thus uses absolute address. */
+#define SUIT_STORAGE_OFFSET                                                                        \
+	(FIXED_PARTITION_OFFSET(suit_storage_partition)) - DT_REG_ADDR(DT_CHOSEN(zephyr_flash))
 #define SUIT_STORAGE_SIZE	    FIXED_PARTITION_SIZE(suit_storage_partition)
 #define SUIT_STORAGE_NORDIC_ADDRESS suit_plat_mem_nvm_ptr_get(SUIT_STORAGE_NORDIC_OFFSET)
 #define SUIT_STORAGE_NORDIC_OFFSET  FIXED_PARTITION_OFFSET(cpusec_suit_storage)
