@@ -41,6 +41,7 @@ function(suit_sign_envelope input_file output_file)
     COMMAND ${PYTHON_EXECUTABLE} ${SIGN_SCRIPT}
     --input-file ${input_file}
     --output-file ${output_file}
+    BYPRODUCTS ${output_file}
   )
 endfunction()
 
@@ -146,6 +147,9 @@ function(suit_create_package)
     suit_copy_artifact_to_output_directory(${image} ${BINARY_DIR}/zephyr/${BINARY_FILE})
   endforeach()
 
+  set(STORAGE_BYPRODUCTS )
+  sysbuild_get(DEFAULT_BINARY_DIR IMAGE ${DEFAULT_IMAGE} VAR APPLICATION_BINARY_DIR CACHE)
+
   foreach(image ${IMAGES})
     unset(GENERATE_LOCAL_ENVELOPE)
     sysbuild_get(GENERATE_LOCAL_ENVELOPE IMAGE ${image} VAR CONFIG_SUIT_LOCAL_ENVELOPE_GENERATE KCONFIG)
@@ -170,6 +174,7 @@ function(suit_create_package)
 
     set(ENVELOPE_YAML_FILE ${SUIT_ROOT_DIRECTORY}${target}.yaml)
     set(ENVELOPE_SUIT_FILE ${SUIT_ROOT_DIRECTORY}${target}.suit)
+    list(APPEND STORAGE_BYPRODUCTS "${DEFAULT_BINARY_DIR}/zephyr/suit_installed_envelopes_${target}_merged.hex")
 
     suit_render_template(${INPUT_ENVELOPE_JINJA_FILE} ${ENVELOPE_YAML_FILE} "${CORE_ARGS}")
     suit_create_envelope(${ENVELOPE_YAML_FILE} ${ENVELOPE_SUIT_FILE} ${SB_CONFIG_SUIT_ENVELOPE_SIGN})
@@ -187,14 +192,13 @@ function(suit_create_package)
     suit_set_absolute_or_relative_path(${INPUT_ROOT_ENVELOPE_JINJA_FILE} ${app_config_dir} INPUT_ROOT_ENVELOPE_JINJA_FILE)
     set(ROOT_ENVELOPE_YAML_FILE ${SUIT_ROOT_DIRECTORY}${ROOT_NAME}.yaml)
     set(ROOT_ENVELOPE_SUIT_FILE ${SUIT_ROOT_DIRECTORY}${ROOT_NAME}.suit)
+    list(APPEND STORAGE_BYPRODUCTS "${DEFAULT_BINARY_DIR}/zephyr/suit_installed_envelopes_application_merged.hex")
     suit_render_template(${INPUT_ROOT_ENVELOPE_JINJA_FILE} ${ROOT_ENVELOPE_YAML_FILE} "${CORE_ARGS}")
     suit_create_envelope(${ROOT_ENVELOPE_YAML_FILE} ${ROOT_ENVELOPE_SUIT_FILE} ${SB_CONFIG_SUIT_ENVELOPE_SIGN})
       list(APPEND STORAGE_BOOT_ARGS
         --input-envelope ${ROOT_ENVELOPE_SUIT_FILE}
       )
   endif()
-
-  sysbuild_get(DEFAULT_BINARY_DIR IMAGE ${DEFAULT_IMAGE} VAR APPLICATION_BINARY_DIR CACHE)
 
   # Read SUIT storage addresses, set during MPI generation
   sysbuild_get(SUIT_STORAGE_ADDRESS IMAGE ${DEFAULT_IMAGE} VAR SUIT_STORAGE_ADDRESS CACHE)
@@ -203,6 +207,8 @@ function(suit_create_package)
   else()
     message(WARNING "Using default value of the SUIT storage address")
   endif()
+
+  list(REMOVE_DUPLICATES STORAGE_BYPRODUCTS)
 
   # create all storages in the DEFAULT_IMAGE output directory
   list(APPEND STORAGE_BOOT_ARGS
@@ -218,9 +224,26 @@ function(suit_create_package)
     ${SUIT_GENERATOR_BUILD_SCRIPT}
     storage
     ${STORAGE_BOOT_ARGS}
+    BYPRODUCTS ${STORAGE_BYPRODUCTS}
   )
   suit_setup_merge()
   suit_register_post_build_commands()
+endfunction()
+
+# Extract domain name from image cache
+#
+# Usage:
+#   get_image_domain(<image> <output_variable>)
+#
+# Parameters:
+#   'image' - name of the image
+#   'output_variable' - variable to store results
+function(get_image_domain image output_variable)
+  sysbuild_get(target_board IMAGE ${image} VAR BOARD CACHE)
+  string(REPLACE "/" ";" split_board_qualifiers "${target_board}")
+  list(GET split_board_qualifiers 2 target_variant)
+
+  set(${output_variable} "${target_variant}" PARENT_SCOPE)
 endfunction()
 
 # Setup task to create final and merged artifact.
@@ -231,58 +254,54 @@ endfunction()
 function(suit_setup_merge)
   sysbuild_get(BINARY_DIR IMAGE ${DEFAULT_IMAGE} VAR APPLICATION_BINARY_DIR CACHE)
   foreach(image ${IMAGES})
-    set(ARTIFACTS_TO_MERGE)
-
-    unset(GENERATE_LOCAL_ENVELOPE)
-    sysbuild_get(GENERATE_LOCAL_ENVELOPE IMAGE ${image} VAR CONFIG_SUIT_LOCAL_ENVELOPE_GENERATE KCONFIG)
-    if(NOT DEFINED GENERATE_LOCAL_ENVELOPE)
-      continue()
-    endif()
-
-    sysbuild_get(IMAGE_BINARY_DIR IMAGE ${image} VAR APPLICATION_BINARY_DIR CACHE)
-    sysbuild_get(IMAGE_BINARY_FILE IMAGE ${image} VAR CONFIG_KERNEL_BIN_NAME KCONFIG)
     sysbuild_get(IMAGE_TARGET_NAME IMAGE ${image} VAR CONFIG_SUIT_ENVELOPE_TARGET KCONFIG)
     if (NOT DEFINED IMAGE_TARGET_NAME OR IMAGE_TARGET_NAME STREQUAL "")
       message(STATUS "DFU: Target name for ${image} is not defined. Skipping.")
       continue()
     endif()
 
-    sysbuild_get(CONFIG_SUIT_ENVELOPE_OUTPUT_ARTIFACT IMAGE ${image} VAR CONFIG_SUIT_ENVELOPE_OUTPUT_ARTIFACT KCONFIG)
-    sysbuild_get(CONFIG_NRF_REGTOOL_GENERATE_UICR IMAGE ${image} VAR CONFIG_NRF_REGTOOL_GENERATE_UICR KCONFIG)
-    sysbuild_get(CONFIG_SUIT_ENVELOPE_OUTPUT_MPI_MERGE IMAGE ${image} VAR CONFIG_SUIT_ENVELOPE_OUTPUT_MPI_MERGE KCONFIG)
-
-    set(OUTPUT_HEX_FILE "${IMAGE_BINARY_DIR}/zephyr/${CONFIG_SUIT_ENVELOPE_OUTPUT_ARTIFACT}")
-
-    list(APPEND ARTIFACTS_TO_MERGE ${BINARY_DIR}/zephyr/suit_installed_envelopes_${IMAGE_TARGET_NAME}_merged.hex)
-    list(APPEND ARTIFACTS_TO_MERGE ${IMAGE_BINARY_DIR}/zephyr/${IMAGE_BINARY_FILE}.hex)
-    if(CONFIG_SUIT_ENVELOPE_OUTPUT_MPI_MERGE)
-      list(APPEND ARTIFACTS_TO_MERGE ${BINARY_DIR}/zephyr/suit_mpi_${IMAGE_TARGET_NAME}_merged.hex)
-    endif()
-    if(CONFIG_NRF_REGTOOL_GENERATE_UICR)
-      list(APPEND ARTIFACTS_TO_MERGE ${IMAGE_BINARY_DIR}/zephyr/uicr.hex)
+    get_image_domain(${image} IMAGE_DOMAIN_NAME)
+    if (NOT DEFINED IMAGE_DOMAIN_NAME OR IMAGE_DOMAIN_NAME STREQUAL "")
+      message(STATUS "DFU: Domain name for ${image} is not defined. Skipping.")
+      continue()
     endif()
 
-    if(SB_CONFIG_SUIT_BUILD_RECOVERY)
-      get_property(
-        recovery_artifacts
-        GLOBAL PROPERTY
-        SUIT_RECOVERY_ARTIFACTS_TO_MERGE_${IMAGE_TARGET_NAME}
-      )
-
-      list(APPEND ARTIFACTS_TO_MERGE ${recovery_artifacts})
+    # Check if root envelope is generated for the image
+    if ((SB_CONFIG_SUIT_ENVELOPE_ROOT_TEMPLATE) AND ("${IMAGE_TARGET_NAME}" STREQUAL "application"))
+      set(force_generate 1)
+    else()
+      unset(force_generate)
     endif()
 
-    set_property(
-      GLOBAL APPEND PROPERTY SUIT_POST_BUILD_COMMANDS
-      COMMAND ${PYTHON_EXECUTABLE} ${ZEPHYR_BASE}/scripts/build/mergehex.py
-      --overlap replace
-      -o ${OUTPUT_HEX_FILE}
-       ${ARTIFACTS_TO_MERGE}
-      # fixme: uicr_merged is overwritten by new content, runners_yaml_props_target could be used to define
-      #     what shall be flashed, but not sure where to set this! Remove --overlap if ready!
-      #     example usage: set_property(TARGET runners_yaml_props_target PROPERTY hex_file ${merged_hex_file})
-       COMMAND ${CMAKE_COMMAND} -E copy ${OUTPUT_HEX_FILE} ${IMAGE_BINARY_DIR}/zephyr/uicr_merged.hex
+    unset(GENERATE_LOCAL_ENVELOPE)
+    sysbuild_get(GENERATE_LOCAL_ENVELOPE IMAGE ${image} VAR CONFIG_SUIT_LOCAL_ENVELOPE_GENERATE KCONFIG)
+    if((NOT DEFINED GENERATE_LOCAL_ENVELOPE) AND (NOT DEFINED force_generate))
+      continue()
+    endif()
+
+    ncs_merge_file(
+      FILES
+        ${BINARY_DIR}/zephyr/suit_installed_envelopes_${IMAGE_TARGET_NAME}_merged.hex
+      DOMAIN
+        ${IMAGE_DOMAIN_NAME}
     )
+
+    sysbuild_get(CONFIG_SUIT_ENVELOPE_OUTPUT_MPI_MERGE IMAGE ${image} VAR CONFIG_SUIT_ENVELOPE_OUTPUT_MPI_MERGE KCONFIG)
+    if(CONFIG_SUIT_ENVELOPE_OUTPUT_MPI_MERGE)
+      # Create a dummy command that reflects the fact that the default image generated the MPI merged files.
+      add_custom_command(
+        OUTPUT ${BINARY_DIR}/zephyr/suit_mpi_${IMAGE_TARGET_NAME}_merged.hex
+        COMMAND ""
+        DEPENDS ${DEFAULT_IMAGE}
+      )
+      ncs_merge_file(
+        FILES
+          ${BINARY_DIR}/zephyr/suit_mpi_${IMAGE_TARGET_NAME}_merged.hex
+        DOMAIN
+          ${IMAGE_DOMAIN_NAME}
+      )
+    endif()
+
   endforeach()
 endfunction()
 
@@ -320,21 +339,23 @@ function(suit_build_recovery)
       "-DCONFIG_SUIT_MPI_RAD_RECOVERY_VENDOR_NAME:STRING=\\\"${RAD_RECOVERY_VENDOR_NAME}\\\""
       "-DCONFIG_SUIT_MPI_RAD_RECOVERY_CLASS_NAME:STRING=\\\"${RAD_RECOVERY_CLASS_NAME}\\\""
     BUILD_ALWAYS True
-)
+  )
   ExternalProject_Get_property(recovery BINARY_DIR)
 
-  set_property(
-    GLOBAL APPEND PROPERTY SUIT_RECOVERY_ARTIFACTS_TO_MERGE_application
-    ${BINARY_DIR}/recovery/zephyr/suit_installed_envelopes_application_merged.hex)
-  set_property(
-    GLOBAL APPEND PROPERTY SUIT_RECOVERY_ARTIFACTS_TO_MERGE_application ${BINARY_DIR}/recovery/zephyr/zephyr.hex)
-
-  set_property(
-    GLOBAL APPEND PROPERTY SUIT_RECOVERY_ARTIFACTS_TO_MERGE_radio
-    ${BINARY_DIR}/recovery/zephyr/suit_installed_envelopes_radio_merged.hex)
-  set_property(
-    GLOBAL APPEND PROPERTY SUIT_RECOVERY_ARTIFACTS_TO_MERGE_radio ${BINARY_DIR}/hci_ipc/zephyr/zephyr.hex)
-
+  # Create a dummy command that reflects the byproducts generated by the external project.
+  add_custom_command(
+    OUTPUT ${BINARY_DIR}/merged.hex ${BINARY_DIR}/merged_cpurad.hex
+    COMMAND ""
+    DEPENDS recovery
+  )
+  ncs_merge_file(
+    FILES ${BINARY_DIR}/merged.hex
+    DOMAIN cpuapp
+  )
+  ncs_merge_file(
+    FILES ${BINARY_DIR}/merged_cpurad.hex
+    DOMAIN cpurad
+  )
 endfunction()
 
 if(SB_CONFIG_SUIT_BUILD_RECOVERY)
