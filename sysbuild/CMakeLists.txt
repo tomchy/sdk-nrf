@@ -517,6 +517,7 @@ function(${SYSBUILD_CURRENT_MODULE_NAME}_post_cmake)
       set(basic_hex_files)
       set(basic_targets)
       set(basic_boards)
+      set(extra_hex_files)
 
       if(SB_CONFIG_SOC_SERIES_NRF53X OR SB_CONFIG_SOC_SERIES_NRF54HX)
         sysbuild_get(default_target_board IMAGE ${DEFAULT_IMAGE} VAR BOARD CACHE)
@@ -543,6 +544,9 @@ function(${SYSBUILD_CURRENT_MODULE_NAME}_post_cmake)
             if(NOT ${target_variant} IN_LIST basic_boards)
               list(APPEND basic_boards ${target_variant})
             endif()
+
+            sysbuild_get(${image}_EXTRA_FILES_TO_MERGE IMAGE ${image} VAR EXTRA_FILES_TO_MERGE CACHE)
+            list(APPEND ${target_variant}_EXTRA_FILES_TO_MERGE ${${image}_EXTRA_FILES_TO_MERGE})
           endif()
 
           if((SB_CONFIG_SOC_SERIES_NRF53X OR SB_CONFIG_SOC_SERIES_NRF54HX) AND NOT "${target_variant}" STREQUAL "${default_target_variant}")
