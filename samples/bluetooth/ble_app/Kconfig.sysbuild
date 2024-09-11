@@ -8,3 +8,12 @@ source "${ZEPHYR_BASE}/share/sysbuild/Kconfig"
 
 config NRF_DEFAULT_IPC_RADIO
 	default y
+
+config SUIT_ENVELOPE
+	default y
+
+config SUIT_BUILD_FLASH_COMPANION
+	default y
+
+config SUIT_ENVELOPE_ROOT_TEMPLATE_FILENAME
+	default "root_with_binary_nordic_top_extflash.yaml.jinja2"
