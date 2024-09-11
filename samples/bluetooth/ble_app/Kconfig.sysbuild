@@ -17,3 +17,6 @@ config SUIT_BUILD_FLASH_COMPANION
 
 config SUIT_ENVELOPE_ROOT_TEMPLATE_FILENAME
 	default "root_with_binary_nordic_top_extflash.yaml.jinja2"
+
+config SUIT_BUILD_RECOVERY
+	default y
