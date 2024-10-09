@@ -1,0 +1,10 @@
+#
+# Copyright (c) 2024 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config SUIT_MANIFEST_BANNER
+	bool "Enable SUIT manifest boot banner"
+        default y
+        depends on SSF_SUIT_SERVICE_ENABLED

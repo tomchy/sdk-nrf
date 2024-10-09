@@ -5,6 +5,7 @@
 #
 
 add_subdirectory(provisioning)
+add_subdirectory_ifdef(CONFIG_SUIT_MANIFEST_BANNER manifest_banner)
 add_subdirectory_ifdef(CONFIG_SUIT plat_err)
 add_subdirectory_ifdef(CONFIG_SUIT memory_layout)
 add_subdirectory_ifdef(CONFIG_SUIT_ORCHESTRATOR orchestrator)

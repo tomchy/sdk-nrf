@@ -5,6 +5,7 @@
 #
 
 rsource "provisioning/Kconfig"
+rsource "manifest_banner/Kconfig"
 
 menuconfig SUIT
 	bool "Enable SUIT modules"
