@@ -1,0 +1,8 @@
+/*
+ * Copyright (c) 2024 Nordic Semiconductor
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
+
+/* Paritioning is defined in a common file for all cores.
+ */
+ #include "nrf54h20dk_nrf54h20-memory-map-v8.dtsi"
