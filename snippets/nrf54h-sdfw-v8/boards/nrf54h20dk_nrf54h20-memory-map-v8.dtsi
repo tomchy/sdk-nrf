@@ -1,0 +1,43 @@
+/*
+ * Copyright (c) 2024 Nordic Semiconductor
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
+
+/delete-node/ &cpurad_slot0_partition;
+&cpurad_rx_partitions {
+	cpurad_slot0_partition: partition@54000 {
+		reg = <0x54000 DT_SIZE_K(256)>;
+	};
+};
+
+/delete-node/ &cpuapp_slot0_partition;
+&cpuapp_rx_partitions {
+	cpuapp_slot0_partition: partition@94000 {
+		reg = <0xa6000 DT_SIZE_K(320)>;
+	};
+};
+
+/delete-node/ &dfu_partition;
+/delete-node/ &storage_partition;
+&cpuapp_rw_partitions {
+	dfu_partition: partition@100000 {
+		reg = < 0x100000 DT_SIZE_K(900) >;
+	};
+
+	storage_partition: partition@1e1000 {
+		reg = < 0x1e1000 DT_SIZE_K(24) >;
+	};
+};
+
+/* TODO: Reconfigure cpurad_storage_partition to @1e7000 in nordic-bt-rpc */
+/* TODO: Remove cpurad_uicr_ext */
+/* TODO: Remove cpuapp_uicr_ext */
+
+/delete-node/ &suit_storage_partition;
+/ {
+	reserved-memory {
+		suit_storage_partition: memory@e1ed000 {
+			reg = <0xe1ed000 DT_SIZE_K(20)>;
+		};
+	};
+};
