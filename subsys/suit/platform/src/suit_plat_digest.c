@@ -7,6 +7,7 @@
 #include <suit_platform.h>
 #include <suit_plat_error_convert.h>
 #include <suit_digest_sink.h>
+#include <suit_gpio_debug.h>
 
 #include <zephyr/logging/log.h>
 
@@ -49,6 +50,8 @@ int suit_plat_check_digest(enum suit_cose_alg alg_id, struct zcbor_string *diges
 
 	struct stream_sink digest_sink;
 
+	suit_gpio_debug_toggle(SUIT_GPIO_PLAT_DIGEST);
+
 	suit_plat_err_t err = suit_digest_sink_get(&digest_sink, psa_alg, digest->value);
 
 	if (err != SUIT_PLAT_SUCCESS) {
@@ -65,6 +68,7 @@ int suit_plat_check_digest(enum suit_cose_alg alg_id, struct zcbor_string *diges
 
 	digest_sink_err_t ret = suit_digest_sink_digest_match(digest_sink.ctx);
 
+	suit_gpio_debug_toggle(SUIT_GPIO_PLAT_DIGEST);
 	err = digest_sink.release(digest_sink.ctx);
 	if (err != SUIT_PLAT_SUCCESS) {
 		LOG_ERR("Failed to release stream: %d", err);

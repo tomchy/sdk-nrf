@@ -11,6 +11,7 @@
 #include <suit_plat_check_image_match_domain_specific.h>
 #include <suit_plat_check_image_match_common.h>
 #include <suit.h>
+#include <suit_gpio_debug.h>
 
 #ifdef CONFIG_SUIT_STREAM_SINK_DIGEST
 #include <suit_memptr_storage.h>
@@ -57,6 +58,7 @@ int suit_plat_check_image_match_mem_mapped(suit_component_t component, enum suit
 
 	struct stream_sink digest_sink;
 
+	suit_gpio_debug_toggle(SUIT_GPIO_PLAT_DIGEST);
 	err = suit_digest_sink_get(&digest_sink, psa_alg, digest->value);
 	if (err != SUIT_PLAT_SUCCESS) {
 		LOG_ERR("Failed to get digest sink: %d", err);
@@ -75,6 +77,7 @@ int suit_plat_check_image_match_mem_mapped(suit_component_t component, enum suit
 		err = suit_plat_err_to_processor_err_convert(err);
 	} else {
 		err = suit_digest_sink_digest_match(digest_sink.ctx);
+		suit_gpio_debug_toggle(SUIT_GPIO_PLAT_DIGEST);
 		if (err != SUIT_PLAT_SUCCESS) {
 			LOG_ERR("Failed to check digest: %d", err);
 			/* Translate error code to allow entering other branches in try-each

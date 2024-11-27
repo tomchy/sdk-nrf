@@ -7,6 +7,7 @@
 #include <zephyr/logging/log.h>
 #include <suit_generic_address_streamer.h>
 #include <suit_address_streamer_selector.h>
+#include <suit_gpio_debug.h>
 
 LOG_MODULE_REGISTER(suit_generic_address_streamer, CONFIG_SUIT_LOG_LEVEL);
 
@@ -20,7 +21,12 @@ suit_plat_err_t suit_generic_address_streamer_stream(const uint8_t *payload, siz
 			LOG_ERR("Streamer source not found for address: %p", (void *)payload);
 			return SUIT_PLAT_ERR_NOT_FOUND;
 		} else {
-			return streamer(payload, payload_size, sink);
+			suit_gpio_debug_toggle(SUIT_GPIO_PLAT_ADDRESS_STREAM);
+
+			int ret = streamer(payload, payload_size, sink);
+
+			suit_gpio_debug_toggle(SUIT_GPIO_PLAT_ADDRESS_STREAM);
+			return ret;
 		}
 	}
 

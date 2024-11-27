@@ -14,6 +14,7 @@
 #include <suit_manifest_variables.h>
 #include <suit_storage_mpi.h>
 #endif /* CONFIG_SUIT_MANIFEST_VARIABLES */
+#include <suit_gpio_debug.h>
 
 LOG_MODULE_REGISTER(suit_plat_authenticate, CONFIG_SUIT_LOG_LEVEL);
 
@@ -99,11 +100,14 @@ int suit_plat_authenticate_manifest(struct zcbor_string *manifest_component_id,
 	psa_key_id_t key = public_key_id;
 #endif /* MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER */
 
+	suit_gpio_debug_toggle(SUIT_GPIO_MFST_AUTHENTICATE);
 	/* Verify data */
 	if (psa_verify_message(key, psa_alg, data->value, data->len, signature->value,
 			       signature->len) == PSA_SUCCESS) {
+		suit_gpio_debug_toggle(SUIT_GPIO_MFST_AUTHENTICATE);
 		return SUIT_SUCCESS;
 	}
+	suit_gpio_debug_toggle(SUIT_GPIO_MFST_AUTHENTICATE);
 
 	LOG_ERR("Signature verification failed.");
 

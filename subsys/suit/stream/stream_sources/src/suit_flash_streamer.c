@@ -9,6 +9,7 @@
 #include <zephyr/drivers/flash.h>
 #include <suit_flash_streamer.h>
 #include <suit_memory_layout.h>
+#include <suit_gpio_debug.h>
 
 LOG_MODULE_REGISTER(suit_flash_streamer, CONFIG_SUIT_LOG_LEVEL);
 
@@ -43,6 +44,7 @@ suit_plat_err_t suit_flash_streamer_stream(const uint8_t *payload, size_t payloa
 		return SUIT_PLAT_ERR_INVAL;
 	}
 
+	suit_gpio_debug_toggle(SUIT_GPIO_PLAT_FLASH_STREAM);
 	do {
 		size_t bytes_remaining = payload_size - bytes_read;
 		size_t read_size = MIN(bytes_remaining, READ_CHUNK_SIZE);
@@ -62,6 +64,7 @@ suit_plat_err_t suit_flash_streamer_stream(const uint8_t *payload, size_t payloa
 		offset += read_size;
 		bytes_read += read_size;
 	} while (bytes_read < payload_size);
+	suit_gpio_debug_toggle(SUIT_GPIO_PLAT_FLASH_STREAM);
 
 	return SUIT_PLAT_SUCCESS;
 }

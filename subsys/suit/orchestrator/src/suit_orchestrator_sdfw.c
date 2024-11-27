@@ -22,6 +22,7 @@
 #include <suit_execution_mode.h>
 #include <suit_dfu_cache.h>
 #include <suit_validator.h>
+#include <suit_gpio_debug.h>
 
 LOG_MODULE_REGISTER(suit_orchestrator, CONFIG_SUIT_LOG_LEVEL);
 
@@ -279,6 +280,8 @@ static int boot_envelope(const suit_manifest_class_id_t *class_id)
 	const uint8_t *installed_envelope_address = NULL;
 	size_t installed_envelope_size = 0;
 
+	suit_gpio_debug_toggle(SUIT_GPIO_MFST_PROCESSING_PART);
+
 	suit_plat_err_t err = suit_storage_installed_envelope_get(
 		class_id, &installed_envelope_address, &installed_envelope_size);
 	if (err != SUIT_PLAT_SUCCESS) {
@@ -300,6 +303,7 @@ static int boot_envelope(const suit_manifest_class_id_t *class_id)
 	suit_semver_raw_t version;
 
 	version.len = ARRAY_SIZE(version.raw);
+	suit_gpio_debug_toggle(SUIT_GPIO_MFST_PROCESSING_PART);
 
 	err = suit_processor_get_manifest_metadata(installed_envelope_address,
 						   installed_envelope_size, true, NULL, version.raw,
@@ -325,6 +329,7 @@ static int boot_envelope(const suit_manifest_class_id_t *class_id)
 	}
 
 	LOG_INF("Processed suit-validate");
+	suit_gpio_debug_toggle(SUIT_GPIO_MFST_PROCESSING_PART);
 
 	err = suit_process_sequence(installed_envelope_address, installed_envelope_size,
 				    SUIT_SEQ_LOAD);
@@ -338,6 +343,7 @@ static int boot_envelope(const suit_manifest_class_id_t *class_id)
 		}
 	}
 	LOG_INF("Processed suit-load");
+	suit_gpio_debug_toggle(SUIT_GPIO_MFST_PROCESSING_PART);
 
 	err = suit_process_sequence(installed_envelope_address, installed_envelope_size,
 				    SUIT_SEQ_INVOKE);
@@ -347,6 +353,7 @@ static int boot_envelope(const suit_manifest_class_id_t *class_id)
 	}
 	LOG_INF("Processed suit-invoke");
 
+	suit_gpio_debug_toggle(SUIT_GPIO_MFST_PROCESSING_PART);
 	return 0;
 }
 
@@ -367,7 +374,9 @@ static int boot_path(bool emergency)
 	for (size_t i = 0; i < class_ids_to_boot_len; i++) {
 		class_id = (const suit_manifest_class_id_t *)class_ids_to_boot[i];
 
+		suit_gpio_debug_toggle(SUIT_GPIO_ORCHESTRATOR_BOOT_PART);
 		ret = boot_envelope(class_id);
+		suit_gpio_debug_toggle(SUIT_GPIO_ORCHESTRATOR_BOOT_PART);
 		if (ret != 0) {
 			LOG_ERR("Booting manifest %d/%d failed (%d):", i + 1, class_ids_to_boot_len,
 				ret);
@@ -399,6 +408,8 @@ int suit_orchestrator_init(void)
 	size_t update_regions_len = 0;
 
 	int err = suit_processor_init();
+
+	suit_gpio_debug_toggle(SUIT_GPIO_ORCHESTRATOR_BOOT_PART);
 
 	if (err != SUIT_SUCCESS) {
 		LOG_ERR("Failed to initialize suit processor: %d", err);
@@ -505,6 +516,7 @@ int suit_orchestrator_init(void)
 		LOG_ERR("Setting execution mode failed: %d", plat_err);
 		return -EIO;
 	}
+	suit_gpio_debug_toggle(SUIT_GPIO_ORCHESTRATOR_BOOT_PART);
 
 	LOG_DBG("SUIT orchestrator init ok");
 	return 0;

@@ -14,6 +14,7 @@
 #include <suit_plat_memptr_size_update.h>
 #include <suit_memory_layout.h>
 #include <suit_plat_copy_domain_specific.h>
+#include <suit_gpio_debug.h>
 
 #ifdef CONFIG_SUIT_IPUC
 #include <suit_ipuc_sdfw.h>
@@ -213,7 +214,8 @@ int suit_plat_copy_domain_specific(suit_component_t dst_handle,
 	 * Validate streaming operation.
 	 */
 
-	if (!suit_plat_copy_domain_specific_is_type_supported(dst_component_type,
+	 suit_gpio_debug_toggle(SUIT_GPIO_PLAT_COPY_PART);
+	 if (!suit_plat_copy_domain_specific_is_type_supported(dst_component_type,
 							      src_component_type)) {
 		LOG_ERR("Unsupported component type pair: (dst: %d, src: %d)", dst_component_type,
 			src_component_type);
@@ -231,6 +233,7 @@ int suit_plat_copy_domain_specific(suit_component_t dst_handle,
 	 * Construct the stream.
 	 */
 
+	suit_gpio_debug_toggle(SUIT_GPIO_PLAT_COPY_PART);
 	/* Select destination */
 	ret = suit_sink_select(dst_handle, &dst_sink);
 	if (ret != SUIT_SUCCESS) {
@@ -238,6 +241,7 @@ int suit_plat_copy_domain_specific(suit_component_t dst_handle,
 		return ret;
 	}
 
+	suit_gpio_debug_toggle(SUIT_GPIO_PLAT_COPY_PART);
 	/* Append decryption filter if encryption info is provided. */
 	if (enc_info != NULL) {
 #ifdef CONFIG_SUIT_STREAM_FILTER_DECRYPT
@@ -276,6 +280,7 @@ int suit_plat_copy_domain_specific(suit_component_t dst_handle,
 	}
 #endif
 
+	suit_gpio_debug_toggle(SUIT_GPIO_PLAT_COPY_PART);
 	/* Erase the destination memory area. */
 	if ((ret == SUIT_SUCCESS) && (dst_sink.erase != NULL)) {
 		plat_ret = dst_sink.erase(dst_sink.ctx);
@@ -285,6 +290,7 @@ int suit_plat_copy_domain_specific(suit_component_t dst_handle,
 		}
 	}
 
+	suit_gpio_debug_toggle(SUIT_GPIO_PLAT_COPY_PART);
 #ifdef CONFIG_SUIT_STREAM_SOURCE_MEMPTR
 	/* Currently all supported source types can be handled with generic address streamer. */
 	memptr_storage_handle_t handle = NULL;
@@ -400,6 +406,7 @@ int suit_plat_copy_domain_specific(suit_component_t dst_handle,
 	}
 #endif /* CONFIG_SUIT_STREAM_SOURCE_MEMPTR */
 
+	suit_gpio_debug_toggle(SUIT_GPIO_PLAT_COPY_PART);
 	/* Flush any remaining data before reading used storage size */
 	if ((ret == SUIT_SUCCESS) && (dst_sink.flush != NULL)) {
 		plat_ret = dst_sink.flush(dst_sink.ctx);
@@ -408,6 +415,7 @@ int suit_plat_copy_domain_specific(suit_component_t dst_handle,
 		}
 	}
 
+	suit_gpio_debug_toggle(SUIT_GPIO_PLAT_COPY_PART);
 	/* Update size in memptr for MEM component */
 	if ((ret == SUIT_SUCCESS) && (dst_component_type == SUIT_COMPONENT_TYPE_MEM)) {
 		size_t new_size = 0;
@@ -432,6 +440,7 @@ int suit_plat_copy_domain_specific(suit_component_t dst_handle,
 	if (ret == SUIT_SUCCESS) {
 		ret = suit_plat_err_to_processor_err_convert(plat_ret);
 	}
+	suit_gpio_debug_toggle(SUIT_GPIO_PLAT_COPY_PART);
 
 	return ret;
 #else  /* CONFIG_SUIT_STREAM */
