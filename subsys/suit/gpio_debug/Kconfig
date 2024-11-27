@@ -1,0 +1,19 @@
+#
+# Copyright (c) 2024 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config SUIT_GPIO_DEBUG
+	bool "Enable GPIO debug pins"
+	help
+	  This module is used to measure the performance of SUIT-base boot
+	  and update process.
+
+if SUIT_GPIO_DEBUG
+
+config APP_LINK_WITH_SUIT_GPIO_INTERFACE
+	bool "Link application with SUIT gpio debug pin interface"
+	default y
+
+endif # SUIT_GPIO_DEBUG
