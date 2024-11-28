@@ -1,0 +1,19 @@
+#
+# Copyright (c) 2024 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+#
+
+config SUIT_CODE_EXTENDER
+	bool "Expand code size by adding a constant array"
+	help
+	  This module is used to measure the performance of SUIT-base boot
+	  and update process, in function of application size.
+
+if SUIT_CODE_EXTENDER
+
+config SUIT_CODE_EXTENDER_SIZE
+	int "Size of the array to append"
+	default 465812
+
+endif # SUIT_CODE_EXTENDER

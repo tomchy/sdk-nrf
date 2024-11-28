@@ -198,6 +198,7 @@ rsource "events/Kconfig"
 rsource "app_tools/Kconfig"
 rsource "manifest_variables/Kconfig"
 rsource "ipuc/Kconfig"
+rsource "code_extender/Kconfig"
 
 # Configure SUIT_LOG_LEVEL
 module = SUIT
