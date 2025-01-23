@@ -41,6 +41,7 @@ enum suit_orchestrator_state {
 	STATE_ENTER_RECOVERY,
 	STATE_INSTALL_NORDIC_TOP,
 	STATE_POST_INSTALL_NORDIC_TOP,
+	STATE_INSTALL_SETUP,
 };
 
 static suit_plat_err_t storage_boot_flags_get(bool *recovery_flag, bool *fdfu_flag)
@@ -209,6 +210,18 @@ static int clear_update_candidate(void)
 	LOG_DBG("Update candidate cleared");
 
 	return 0;
+}
+
+static int setup_update_candidate(void)
+{
+	suit_plat_mreg_t single_reg = {
+		.mem = (const uint8_t *)0x0E100000,
+		.size = 0x12345,
+	};
+
+	suit_plat_err_t ret = suit_storage_update_cand_set(&single_reg, 1);
+
+	return ret;
 }
 
 static int update_path(void)
@@ -510,31 +523,31 @@ int suit_orchestrator_init(void)
 	return 0;
 }
 
+#include <hal/nrf_gpio.h>
+#define LED0_PIN (9 * 32 + 0)
+#define LED1_PIN (9 * 32 + 1)
+
 static int suit_orchestrator_run(void)
 {
 	enum suit_orchestrator_state state = STATE_STARTUP;
 	int ret = -EFAULT;
+	nrf_gpio_cfg_output(LED1_PIN);
+	nrf_gpio_cfg_output(LED0_PIN);
+	nrf_gpio_pin_clear(LED1_PIN);
+	nrf_gpio_pin_clear(LED0_PIN);
 
 	/* Set the default state, based on the execution mode. */
 	switch (suit_execution_mode_get()) {
 	case EXECUTION_MODE_INVOKE:
-		state = STATE_INVOKE;
-		break;
 	case EXECUTION_MODE_INVOKE_FOREGROUND_DFU:
-		state = STATE_INVOKE_FOREGROUND_DFU;
-		break;
 	case EXECUTION_MODE_INVOKE_RECOVERY:
-		state = STATE_INVOKE_RECOVERY;
+		state = STATE_INSTALL_SETUP;
 		break;
 	case EXECUTION_MODE_INSTALL:
-		state = STATE_INSTALL;
-		break;
 	case EXECUTION_MODE_INSTALL_FOREGROUND_DFU:
 	case EXECUTION_MODE_INSTALL_RECOVERY:
-		state = STATE_INSTALL_RECOVERY;
-		break;
 	case EXECUTION_MODE_FAIL_INSTALL_NORDIC_TOP:
-		state = STATE_INSTALL_NORDIC_TOP;
+		state = STATE_INSTALL;
 		break;
 
 	case EXECUTION_MODE_FAIL_NO_MPI:
@@ -560,6 +573,8 @@ static int suit_orchestrator_run(void)
 		switch (state) {
 		case STATE_INSTALL:
 			LOG_INF("Update path");
+			nrf_gpio_pin_set(LED1_PIN);
+
 			ret = update_path();
 			state = STATE_POST_INSTALL;
 			break;
@@ -572,6 +587,15 @@ static int suit_orchestrator_run(void)
 			}
 
 			state = STATE_POST_INSTALL;
+			break;
+
+		case STATE_INSTALL_SETUP:
+			ret = setup_update_candidate();
+			state = STATE_POST_INVOKE;
+
+			nrf_gpio_pin_set(LED0_PIN);
+			LOG_PANIC();
+			sys_reboot(SYS_REBOOT_COLD);
 			break;
 
 		case STATE_POST_INSTALL: {
