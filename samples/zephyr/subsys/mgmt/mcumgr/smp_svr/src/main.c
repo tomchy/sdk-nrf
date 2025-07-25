@@ -71,6 +71,24 @@ static void blinfo_bootloader_version(void)
 		        version.iv_minor, version.iv_revision, version.iv_build_num);
         }
 }
+
+static void blinfo_security_counter(void)
+{
+	uint32_t counter = 0;
+
+	int ret = blinfo_lookup(BLINFO_SECURITY_COUNTER_IMAGE_0, (char *)&counter,
+				sizeof(counter));
+
+	if (ret < 0) {
+		LOG_INF("blinfo_lookup error: %d", ret);
+	} else {
+		LOG_INF("Security counter: %d", counter);
+        }
+
+        if (counter > CONFIG_MCUBOOT_HW_DOWNGRADE_PREVENTION_COUNTER_VALUE) {
+                LOG_ERR("Security counter insufficient - enter degraded mode");
+        }
+}
 #endif /* CONFIG_RETENTION_BOOTLOADER_INFO */
 
 int main(void)
@@ -84,6 +102,7 @@ int main(void)
 
 #ifdef CONFIG_RETENTION_BOOTLOADER_INFO
         blinfo_bootloader_version();
+        blinfo_security_counter();
 #endif
 
 	/* Register the built-in mcumgr command handlers. */
