@@ -63,6 +63,8 @@ Trying to change them directly in an image will result in the new value being ov
 +-------------------------------------------------------------------------+---------------------------------------------------------------------------+-------------------------+
 | :kconfig:option:`CONFIG_SINGLE_APPLICATION_SLOT`                        + :kconfig:option:`SB_CONFIG_MCUBOOT_MODE_SINGLE_APP`                       | MCUboot                 |
 +-------------------------------------------------------------------------+---------------------------------------------------------------------------+                         |
+| :kconfig:option:`CONFIG_BOOT_SWAP_USING_MOVE`                           + :kconfig:option:`SB_CONFIG_MCUBOOT_MODE_SWAP_USING_MOVE`                  |                         |
++-------------------------------------------------------------------------+---------------------------------------------------------------------------+                         |
 | :kconfig:option:`CONFIG_BOOT_SWAP_USING_SCRATCH`                        + :kconfig:option:`SB_CONFIG_MCUBOOT_MODE_SWAP_SCRATCH`                     |                         |
 +-------------------------------------------------------------------------+---------------------------------------------------------------------------+                         |
 | :kconfig:option:`CONFIG_BOOT_UPGRADE_ONLY`                              + :kconfig:option:`SB_CONFIG_MCUBOOT_MODE_OVERWRITE_ONLY`                   |                         |
