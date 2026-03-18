@@ -35,8 +35,6 @@
 #error "Unsupported internal flash controller"
 #endif
 
-#define PARTITION_LABEL coredump_partition
-
 /* Extract DTS properties */
 
 #define FLASH_NODE	 DT_INST(0, soc_nv_flash)
@@ -48,11 +46,11 @@
 #define FLASH_ERASE_SIZE FLASH_WRITE_SIZE
 #endif
 
-#define PARTITION_OFFSET FIXED_PARTITION_OFFSET(PARTITION_LABEL)
-#define PARTITION_SIZE	 FIXED_PARTITION_SIZE(PARTITION_LABEL)
-#define PARTITION_ADDR	 (FLASH_ADDR + PARTITION_OFFSET)
+#define PARTITION_OFFSET PARTITION_OFFSET(coredump_partition)
+#define PARTITION_SIZE	 PARTITION_SIZE(coredump_partition)
+#define PARTITION_ADDR	 PARTITION_ADDRESS(coredump_partition)
 
-BUILD_ASSERT(FIXED_PARTITION_EXISTS(PARTITION_LABEL),
+BUILD_ASSERT(PARTITION_EXISTS(coredump_partition),
 	     "Missing fixed partition named 'coredump_partition'");
 BUILD_ASSERT(PARTITION_OFFSET % FLASH_ERASE_SIZE == 0,
 	     "Core dump partition unaligned to erase block size");
