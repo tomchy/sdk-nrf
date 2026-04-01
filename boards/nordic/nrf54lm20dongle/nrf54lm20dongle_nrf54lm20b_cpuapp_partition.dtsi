@@ -28,7 +28,7 @@
 		};
 
 		/* firmware_loader */
-		slot1_partition: partition@6000 {
+		secondary_app_partition: slot1_partition: partition@6000 {
 			label = "image-1";
 			reg = <0x6000 DT_SIZE_K(116)>;
 		};

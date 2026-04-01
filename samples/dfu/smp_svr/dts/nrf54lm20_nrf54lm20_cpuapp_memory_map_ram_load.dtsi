@@ -31,7 +31,7 @@
 
 		/* Gap from 88400 to 88800 to ensure 2kB alignment */
 
-		slot1_partition: partition@88800 {
+		secondary_app_partition: slot1_partition: partition@88800 {
 			label = "image-1";
 			reg = <0x8f800 DT_SIZE_K(481)>;
 		};
