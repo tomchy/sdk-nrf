@@ -4,6 +4,7 @@
 
 include(${ZEPHYR_NRF_MODULE_DIR}/cmake/sysbuild/bootloader_dts_utils.cmake)
 include(${ZEPHYR_NRF_MODULE_DIR}/cmake/sysbuild/ironside_se_tlv.cmake)
+include(${ZEPHYR_NRF_MODULE_DIR}/cmake/sysbuild/manufacturing_app_tlv.cmake)
 
 # Find the slot address and size for the given image.
 # Usage:
@@ -381,6 +382,21 @@ function(mcuboot_sign_sysbuild main_image)
     generate_ironside_se_tlvs_sysbuild(${main_image} tlv_extra_imgtool_args tlv_extra_sign_depends)
     list(APPEND imgtool_args ${tlv_extra_imgtool_args})
     list(APPEND imgtool_depends ${tlv_extra_sign_depends})
+  endif()
+
+  ###
+  # Handle manufacturing app TLVs.
+  ###
+
+  set(CONFIG_NCS_MCUBOOT_APPLICATION_MANUFACTURING_APP)
+  sysbuild_get(CONFIG_NCS_MCUBOOT_APPLICATION_MANUFACTURING_APP IMAGE ${main_image} VAR
+    CONFIG_NCS_MCUBOOT_APPLICATION_MANUFACTURING_APP KCONFIG)
+  if(CONFIG_NCS_MCUBOOT_APPLICATION_MANUFACTURING_APP)
+    set(manufacturing_app_tlvs_args)
+    set(manufacturing_app_tlvs_depends)
+    generate_manufacturing_app_tlvs_sysbuild(${main_image} manufacturing_app_tlvs_args manufacturing_app_tlvs_depends)
+    list(APPEND imgtool_args ${manufacturing_app_tlvs_args})
+    list(APPEND imgtool_depends ${manufacturing_app_tlvs_depends})
   endif()
 
   ###
